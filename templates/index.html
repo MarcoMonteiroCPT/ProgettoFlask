@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Color Analyzer{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+          <h1 class="h4 mb-3">Analizza i colori di un'immagine</h1>
+          <p class="text-muted mb-4">
+            Carica una foto e ti verranno mostrati i <strong>6 colori più utilizzati</strong>, con percentuale, RGB e HEX.
+          </p>
+          <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="image" class="form-label">Seleziona immagine</label>
+              <input class="form-control" type="file" id="image" name="image" accept=".png,.jpg,.jpeg,.gif" required>
+              <div class="form-text">Formati supportati: PNG, JPG, JPEG, GIF. Max 5 MB.</div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              Analizza colori
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {% if colors %}
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-4">
+            <h2 class="h5 mb-3">Risultato analisi</h2>
+
+            {% if filename %}
+              <div class="mb-3 text-center">
+                <img
+                  src="{{ url_for('static', filename='uploads/' ~ filename) }}"
+                  alt="Immagine caricata"
+                  class="img-fluid rounded"
+                  style="border: 2px solid #000; box-sizing: border-box;"
+                >
+              </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="text-muted small">Top 6 colori principali</span>
+              {% if filename %}
+                <a class="btn btn-outline-secondary btn-sm"
+                   href="{{ url_for('default.download_palette', filename=filename) }}">
+                  Scarica palette (.gpl) per GIMP
+                </a>
+              {% endif %}
+            </div>
+
+            <div class="row g-3">
+              {% for c in colors %}
+                <div class="col-md-4">
+                  <div class="card border-0 h-100">
+                    <div class="color-preview mb-2" data-color="{{ c.hex }}"></div>
+                    <div>
+                      <div class="fw-semibold mb-1">{{ c.hex }}</div>
+                      <div class="text-muted small">
+                        RGB: ({{ c.rgb[0] }}, {{ c.rgb[1] }}, {{ c.rgb[2] }})<br>
+                        Percentuale: {{ c.percentage }}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script>
+    document
+      .querySelectorAll('[data-color]')
+      .forEach(function (element) {
+        element.style.backgroundColor = element.dataset.color || '#000000';
+      });
+  </script>
+{% endblock %}
